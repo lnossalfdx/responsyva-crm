@@ -89,8 +89,8 @@ export function DashboardPage() {
       {
         label: "MRR",
         value: formatCurrency(financeSummary.mrr),
-        delta: financeSummary.commissionTotal
-          ? `Comissão comercial: ${formatCurrency(financeSummary.commissionTotal)}`
+        delta: financeSummary.closedRevenue
+          ? `Valor total fechado: ${formatCurrency(financeSummary.closedRevenue)}`
           : "Sem dados",
         trend: "neutral",
       },
@@ -101,7 +101,7 @@ export function DashboardPage() {
         trend: "neutral",
       },
     ],
-    [activeClients, financeSummary.closedLeads.length, financeSummary.closedRevenue, financeSummary.commissionTotal, financeSummary.mrr, financeSummary.openLeads.length, financeSummary.projectedRevenue, visibleLeads.length, visibleProjects.length],
+    [activeClients, financeSummary.closedLeads.length, financeSummary.closedRevenue, financeSummary.mrr, financeSummary.openLeads.length, financeSummary.projectedRevenue, visibleLeads.length, visibleProjects.length],
   );
   const todaysSchedules = useMemo(
     () =>
@@ -150,8 +150,14 @@ export function DashboardPage() {
       <Card className="mx-auto max-w-3xl overflow-hidden border-emerald-400/15 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.14),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-8 py-7 text-center">
         <p className="text-[11px] uppercase tracking-[0.42em] text-emerald-300/70">Valuation</p>
         <div className="mt-4 space-y-3">
-          <p className="text-4xl font-semibold tracking-tight text-white lg:text-5xl">R$ 0</p>
-          <p className="text-sm text-zinc-400">Valuation aguardando dados operacionais.</p>
+          <p className="text-4xl font-semibold tracking-tight text-white lg:text-5xl">
+            {formatCurrency(financeSummary.valuation)}
+          </p>
+          <p className="text-sm text-zinc-400">
+            {financeSummary.valuation
+              ? `Baseado na recorrência fechada de ${formatCurrency(financeSummary.recurringRevenue)} por mês.`
+              : "Valuation aguardando negócios fechados e recorrência mensal."}
+          </p>
         </div>
       </Card>
 

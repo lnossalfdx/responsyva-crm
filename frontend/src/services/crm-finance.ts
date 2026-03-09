@@ -16,19 +16,26 @@ export function getFinanceSummaryFromLeads(leads: Lead[]) {
 
   const closedRevenue = closedLeads.reduce((sum, lead) => sum + lead.estimatedValue, 0);
   const projectedRevenue = openLeads.reduce((sum, lead) => sum + lead.estimatedValue, 0);
-  const mrr = closedLeads.reduce((sum, lead) => sum + lead.monthlyValue, 0);
+  const recurringRevenue = closedLeads.reduce((sum, lead) => sum + lead.monthlyValue, 0);
   const commissionTotal = closedLeads.reduce(
     (sum, lead) => sum + lead.estimatedValue * SALES_COMMISSION_RATE,
     0,
   );
+  const valuation = recurringRevenue > 0
+    ? recurringRevenue * 12 * 6
+    : closedRevenue > 0
+      ? closedRevenue * 6
+      : 0;
 
   return {
     closedLeads,
     openLeads,
     closedRevenue,
     projectedRevenue,
-    mrr,
+    mrr: commissionTotal,
+    recurringRevenue,
     commissionTotal,
+    valuation,
   };
 }
 

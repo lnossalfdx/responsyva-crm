@@ -6,7 +6,7 @@ import { Button } from "@/components/shared/button";
 import { Card } from "@/components/shared/card";
 import { SectionHeader } from "@/components/shared/section-header";
 import { createUser, listUsers, type UserRecord as SystemUser } from "@/services/crm-api";
-import { getOwnerNameFromFullName, loadCurrentUser, saveCurrentUser } from "@/services/access-control";
+import { loadCurrentUser } from "@/services/access-control";
 
 type UserRole = "Super Admin" | "Admin" | "Operacional" | "Financeiro" | "Comercial";
 type UserStatus = "Ativo" | "Convidado" | "Suspenso";
@@ -19,8 +19,9 @@ export function SettingsPage() {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    password: "",
     role: "Operacional" as UserRole,
-    status: "Convidado" as UserStatus,
+    status: "Ativo" as UserStatus,
     department: "",
   });
 
@@ -31,13 +32,14 @@ export function SettingsPage() {
   }, []);
 
   async function handleCreateUser() {
-    if (!form.name.trim() || !form.email.trim()) {
+    if (!form.name.trim() || !form.email.trim() || !form.password.trim()) {
       return;
     }
 
     const newUser = await createUser({
       name: form.name.trim(),
       email: form.email.trim(),
+      password: form.password,
       role: form.role,
       status: form.status,
       department: form.department.trim() || "Não definido",
@@ -49,21 +51,11 @@ export function SettingsPage() {
     setForm({
       name: "",
       email: "",
+      password: "",
       role: "Operacional",
-      status: "Convidado",
+      status: "Ativo",
       department: "",
     });
-  }
-
-  function assumeUser(user: SystemUser) {
-    saveCurrentUser({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      ownerName: getOwnerNameFromFullName(user.name),
-    });
-    window.location.reload();
   }
 
   return (
@@ -217,8 +209,9 @@ export function SettingsPage() {
                   <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
                     <p className="mb-3 text-sm font-medium text-white">Ações administrativas</p>
                     <div className="grid gap-3">
-                      <Button onClick={() => assumeUser(selectedUser)}>Usar esta conta</Button>
-                      <Button variant="secondary">Reenviar convite</Button>
+                      <Button variant="secondary" onClick={() => navigator.clipboard.writeText(selectedUser.email)}>
+                        Copiar email
+                      </Button>
                       <Button variant="secondary">Editar permissões</Button>
                       <Button variant="ghost">Suspender acesso</Button>
                     </div>
@@ -268,6 +261,15 @@ export function SettingsPage() {
                     />
                   </label>
                   <label className="space-y-2">
+                    <span className="text-sm text-zinc-300">Senha inicial</span>
+                    <input
+                      type="password"
+                      value={form.password}
+                      onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
+                    />
+                  </label>
+                  <label className="space-y-2">
                     <span className="text-sm text-zinc-300">Papel</span>
                     <select
                       value={form.role}
@@ -288,8 +290,8 @@ export function SettingsPage() {
                       onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as UserStatus }))}
                       className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none"
                     >
-                      <option value="Convidado">Convidado</option>
                       <option value="Ativo">Ativo</option>
+                      <option value="Convidado">Convidado</option>
                       <option value="Suspenso">Suspenso</option>
                     </select>
                   </label>

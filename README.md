@@ -36,7 +36,7 @@ PORT=3333
 CORS_ORIGIN=https://crm.responsyvya-ai.com.br
 SUPABASE_URL=https://SEU-PROJETO.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=SUA_SERVICE_ROLE_KEY
-SUPABASE_ANON_KEY=SUA_ANON_KEY
+JWT_SECRET=UMA_CHAVE_GRANDE_COM_32_CARACTERES_OU_MAIS
 ```
 
 ## Deploy VPS
@@ -47,14 +47,22 @@ No SQL Editor, execute nesta ordem:
 
 - `supabase/migrations/20260306_initial_schema.sql`
 - `supabase/migrations/20260309_crm_runtime_fields.sql`
+- `supabase/migrations/20260309_auth_passwords.sql`
 
 Depois insira pelo menos um usuário em `users` para conseguir entrar no CRM.
 
 Exemplo:
 
 ```sql
-insert into users (full_name, email, role, status, department)
-values ('Logan Nossal', 'logan@responsyva.ai', 'Super Admin', 'Ativo', 'Diretoria');
+insert into users (full_name, email, role, status, department, password_hash)
+values (
+  'Logan Nossal',
+  'logan@responsyva.ai',
+  'Super Admin',
+  'Ativo',
+  'Diretoria',
+  crypt('SUA_SENHA_FORTE', gen_salt('bf'))
+);
 ```
 
 ### 2. Build

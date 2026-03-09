@@ -49,6 +49,7 @@ type ResourceConfig = {
   createSchema: ZodTypeAny;
   updateSchema: ZodTypeAny;
   defaultOrderBy?: string;
+  defaultSelect?: string;
 };
 
 export const resourceConfigs: Record<ResourceName, ResourceConfig> = {
@@ -57,6 +58,7 @@ export const resourceConfigs: Record<ResourceName, ResourceConfig> = {
     createSchema: userCreateSchema,
     updateSchema: userUpdateSchema,
     defaultOrderBy: "created_at",
+    defaultSelect: "id,full_name,email,role,avatar_url,status,department,created_at",
   },
   leads: {
     table: "leads",

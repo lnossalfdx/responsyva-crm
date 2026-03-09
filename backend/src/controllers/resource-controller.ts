@@ -14,9 +14,11 @@ function getResourceConfig(resourceName: ResourceName) {
 export async function listResources(request: Request, response: Response) {
   const resourceName = request.params.resource as ResourceName;
   const config = getResourceConfig(resourceName);
+  const defaultSelect = request.query.select ?? config.defaultSelect ?? "*";
   const pagination = paginationSchema.parse({
     ...request.query,
     orderBy: request.query.orderBy ?? config.defaultOrderBy ?? "created_at",
+    select: defaultSelect,
   });
   const filters = Object.fromEntries(
     Object.entries(request.query).filter(([key]) => !["limit", "offset", "orderBy", "ascending", "select"].includes(key)),
@@ -30,7 +32,7 @@ export async function getResourceById(request: Request, response: Response) {
   const resourceName = request.params.resource as ResourceName;
   const config = getResourceConfig(resourceName);
   const recordId = z.string().min(1).parse(request.params.id);
-  const select = z.string().min(1).catch("*").parse(request.query.select);
+  const select = z.string().min(1).catch(config.defaultSelect ?? "*").parse(request.query.select);
   const payload = await service.getById(config.table, recordId, select, config.idField);
   return response.json(payload);
 }

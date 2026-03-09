@@ -212,6 +212,18 @@ type DashboardPayload = {
   };
 };
 
+type LoginPayload = {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    fullName: string;
+    status: string;
+    department?: string | null;
+  };
+};
+
 function stageFromApi(stage: string): PipelineStageId {
   return stage.replaceAll("_", "-") as PipelineStageId;
 }
@@ -383,43 +395,54 @@ function mapProposal(item: ApiProposal): Proposal {
 }
 
 export async function listUsers() {
-  const response = await listResource<ApiUser>("users", { orderBy: "created_at", ascending: false });
+  const response = await listResource<ApiUser>("users", {
+    orderBy: "created_at",
+    ascending: false,
+    select: "id,full_name,email,role,status,department",
+  });
   return response.data.map(mapUser);
 }
 
-export async function signInWithApiProfile(email: string): Promise<CurrentUser> {
-  const response = await listResource<ApiUser>("users", {
-    email: email.trim().toLowerCase(),
-    limit: 1,
+export async function signInWithApiProfile(email: string, password: string): Promise<{ token: string; user: CurrentUser }> {
+  const response = await fetch(`${import.meta.env.VITE_API_URL ?? "http://localhost:3333/api"}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: email.trim().toLowerCase(),
+      password,
+    }),
   });
 
-  const user = response.data[0];
-
-  if (!user) {
-    throw new Error("Usuário não encontrado.");
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(message || "Falha ao autenticar.");
   }
 
-  const mapped = mapUser(user);
-
+  const payload = (await response.json()) as LoginPayload;
   return {
-    id: mapped.id,
-    name: mapped.name,
-    email: mapped.email,
-    role: mapped.role,
-    ownerName: mapped.ownerName,
+    token: payload.token,
+    user: {
+      id: payload.user.id,
+      name: payload.user.fullName,
+      email: payload.user.email,
+      role: roleFromApi(payload.user.role),
+      ownerName: getOwnerNameFromFullName(payload.user.fullName),
+    },
   };
 }
 
 export async function createUser(input: {
   name: string;
   email: string;
+  password: string;
   role: AppUserRole;
   status: string;
   department: string;
 }) {
-  const created = await createResource<ApiUser>("users", {
+  const created = await createResource<ApiUser>("auth/users", {
     full_name: input.name,
     email: input.email,
+    password: input.password,
     role: input.role,
     status: input.status,
     department: input.department,

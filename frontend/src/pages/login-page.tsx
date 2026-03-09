@@ -3,7 +3,7 @@ import { ArrowRight, LockKeyhole, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/shared/button";
 import { Card } from "@/components/shared/card";
-import { saveCurrentUser } from "@/services/access-control";
+import { saveAuthSession } from "@/services/access-control";
 import { signInWithApiProfile } from "@/services/crm-api";
 
 export function LoginPage() {
@@ -16,7 +16,7 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleLogin() {
-    if (!form.email.trim()) {
+    if (!form.email.trim() || !form.password.trim()) {
       return;
     }
 
@@ -24,8 +24,8 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      const user = await signInWithApiProfile(form.email);
-      saveCurrentUser(user);
+      const session = await signInWithApiProfile(form.email, form.password);
+      saveAuthSession(session.user, session.token);
       navigate("/", { replace: true });
       window.location.reload();
     } catch (requestError) {

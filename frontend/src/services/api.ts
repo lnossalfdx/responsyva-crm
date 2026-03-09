@@ -1,3 +1,5 @@
+import { clearCurrentUser, getAuthToken } from "@/services/access-control";
+
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:3333/api";
 
 type ListResponse<T> = {
@@ -25,10 +27,25 @@ function buildUrl(path: string, params?: Record<string, string | number | boolea
   return url.toString();
 }
 
+function handleUnauthorized() {
+  clearCurrentUser();
+
+  if (typeof window !== "undefined" && window.location.pathname !== "/login") {
+    window.location.href = "/login";
+  }
+}
+
 export async function fetcher<T>(path: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
-  const response = await fetch(buildUrl(path, params));
+  const token = getAuthToken();
+  const response = await fetch(buildUrl(path, params), {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      handleUnauthorized();
+    }
+
     throw new Error(`Erro ao buscar ${path}`);
   }
 
@@ -51,13 +68,21 @@ export async function getResource<T>(
 }
 
 async function sendJson<T>(path: string, method: "POST" | "PATCH" | "DELETE", body?: unknown): Promise<T> {
+  const token = getAuthToken();
   const response = await fetch(`${API_BASE}${path}`, {
     method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      handleUnauthorized();
+    }
+
     const message = await response.text();
     throw new Error(message || `Erro na requisição ${method} ${path}`);
   }

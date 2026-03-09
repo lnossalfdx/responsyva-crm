@@ -15,13 +15,14 @@ export type CurrentUser = {
 
 const STORAGE_KEY = "responsyva-current-user";
 const AUTH_STORAGE_KEY = "responsyva-authenticated";
+const AUTH_TOKEN_KEY = "responsyva-auth-token";
 
 const defaultCurrentUser: CurrentUser = {
-  id: "user-1",
-  name: "Logan Nossal",
-  email: "logan@responsyva.ai",
-  role: "Super Admin",
-  ownerName: "Logan",
+  id: "",
+  name: "",
+  email: "",
+  role: "Operacional",
+  ownerName: "",
 };
 
 function normalizeValue(value: string) {
@@ -65,12 +66,29 @@ export function saveCurrentUser(user: CurrentUser) {
   window.localStorage.setItem(AUTH_STORAGE_KEY, "true");
 }
 
+export function saveAuthSession(user: CurrentUser, token: string) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  saveCurrentUser(user);
+  window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+}
+
+export function getAuthToken() {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  return window.localStorage.getItem(AUTH_TOKEN_KEY) || "";
+}
+
 export function isAuthenticated() {
   if (typeof window === "undefined") {
     return false;
   }
 
-  return window.localStorage.getItem(AUTH_STORAGE_KEY) === "true";
+  return window.localStorage.getItem(AUTH_STORAGE_KEY) === "true" && !!getAuthToken();
 }
 
 export function clearCurrentUser() {
@@ -80,6 +98,7 @@ export function clearCurrentUser() {
 
   window.localStorage.removeItem(STORAGE_KEY);
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  window.localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 export function isCommercialUser(user: CurrentUser) {
@@ -100,40 +119,4 @@ export function canViewOwnedRecord(user: CurrentUser, owner: string) {
   }
 
   return normalizeValue(owner) === normalizeValue(user.ownerName);
-}
-
-export function signInWithLocalProfile(email: string) {
-  const normalizedEmail = email.trim().toLowerCase();
-
-  if (!normalizedEmail) {
-    return defaultCurrentUser;
-  }
-
-  if (normalizedEmail === "bia@responsyva.ai") {
-    return {
-      id: "user-3",
-      name: "Bia Teles",
-      email: "bia@responsyva.ai",
-      role: "Comercial",
-      ownerName: "Bia",
-    } satisfies CurrentUser;
-  }
-
-  if (normalizedEmail === "carol@responsyva.ai") {
-    return {
-      id: "user-2",
-      name: "Carol Prado",
-      email: "carol@responsyva.ai",
-      role: "Admin",
-      ownerName: "Carol",
-    } satisfies CurrentUser;
-  }
-
-  return {
-    id: "user-1",
-    name: "Logan Nossal",
-    email: normalizedEmail || "logan@responsyva.ai",
-    role: "Super Admin",
-    ownerName: "Logan",
-  } satisfies CurrentUser;
 }

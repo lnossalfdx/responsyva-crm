@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #07090d;
+  --color-foreground: #f4f4f5;
+}
+
+:root {
+  color-scheme: dark;
+  font-family:
+    "Satoshi",
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(52, 211, 153, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 24%),
+    linear-gradient(180deg, #06070a 0%, #090b11 48%, #06070a 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  color: #f4f4f5;
+  background-color: #07090d;
+  overflow-x: hidden;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+select {
+  font: inherit;
+  color: #f4f4f5;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+select option,
+select optgroup {
+  color: #f4f4f5;
+  background-color: #11131a;
+}
+
+.bg-background {
+  background-color: #07090d;
+}
+
+.text-foreground {
+  color: #f4f4f5;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(52, 211, 153, 0.35), rgba(139, 92, 246, 0.35));
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-surface:focus,
+.recharts-surface:focus-visible,
+.recharts-responsive-container:focus,
+.recharts-responsive-container:focus-visible {
+  outline: none !important;
+}
